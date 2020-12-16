@@ -1,7 +1,9 @@
 from django.shortcuts import render
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
+from django.urls import reverse
 
 from random import randrange
+from os import listdir, path
 
 import markdown2
 
@@ -20,7 +22,20 @@ def entry(request, entry_name):
     content = markdown2.markdown(entry)
 
     if entry is None:
-        raise Http404
+        def escape(s):
+            """
+            Escape special characters.
+
+            https://github.com/jacebrowning/memegen#special-characters
+            """
+            for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
+                            ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
+                s = s.replace(old, new)
+            return s
+        return render(request, "encyclopedia/apology.html",{
+            "top": 404,
+            "bottom": escape("The page you tried to acces does not exist")
+        })
     else:
         return render(request, "encyclopedia/entry.html", {
             "entry_name": entry_name,
@@ -43,6 +58,33 @@ def random(request):
 
 def new_page(request):
     if request.method == "POST":
-        pass
+        title = request.POST["title"].capitalize()
+
+        if not title.endswith(".md"):
+            title = title + ".md"
+
+        if title in listdir("entries"):
+            def escape(s):
+                """
+                Escape special characters.
+
+                https://github.com/jacebrowning/memegen#special-characters
+                """
+                for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
+                                ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
+                    s = s.replace(old, new)
+                return s
+            return render(request, "encyclopedia/apology.html",{
+                "top": 404,
+                "bottom": escape("This file already exists please enter a different file name")
+            })
+        else:
+            content_path = path.join("entries", title)
+            output_file = open(content_path, "w")
+            content = request.POST["content"]
+            output_file.write(content)
+            output_file.close()
+
+            return HttpResponseRedirect(reverse("index"))
 
     return render(request, "encyclopedia/new-page.html")
