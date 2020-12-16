@@ -1,0 +1,16 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Create New Page
+{% endblock %}
+
+{% block body %}
+    <h1>Create a new markdown page</h1>
+
+    <form action="{% url 'new_page' %}" method="post">
+        <label for="new-page"></label>
+        <textarea id="new-page" name="content" rows="4" cols="50" autofocus dir_name="entries.dir" placeholder="Enter markdown text here" required></textarea>
+        <br><br>
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}
