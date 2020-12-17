@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from random import randrange
 from os import listdir, path
+import re
 
 import markdown2
 
@@ -88,3 +89,43 @@ def new_page(request):
             return HttpResponseRedirect(reverse("index"))
 
     return render(request, "encyclopedia/new-page.html")
+
+
+def search(request):
+    entry_name = request.POST["q"]
+    entries = util.list_entries()
+    contents = list()
+
+    if entry_name.casefold() in (entry.casefold() for entry in entries):
+        content = util.get_entry(entry_name)
+        
+        return HttpResponseRedirect(reverse("entry", kwargs={"entry_name": entry_name.capitalize()}))
+
+    for string in entries:
+        if re.search(entry_name, string, re.IGNORECASE):
+            contents.append(string)
+
+    return render(request, "encyclopedia/search.html", {
+        "contents": contents
+    })
+
+def edit_page(request, filename):
+    if request.method == "POST":
+        content = request.POST["content"]
+        file_path = path.join("entries", filename + ".md")
+        print(file_path)
+        fileptr = open(file_path, "w")
+        fileptr.write(content)
+        fileptr.close()
+
+        return HttpResponseRedirect(reverse("entry", kwargs={"entry_name": filename}))
+    else:
+        file_path = path.join("entries", filename + ".md")
+        fileptr = open(file_path, "r")
+        content = fileptr.read()
+        fileptr.close()
+
+        return render(request, "encyclopedia/edit-page.html", {
+            "filename": filename,
+            "content": content
+        })
