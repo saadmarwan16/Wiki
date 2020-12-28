@@ -10,7 +10,6 @@
     <form action="{% url 'new_page' %}" method="post">
         {% csrf_token %}
 
-        <!-- {{ form }} -->
         <label for="new-page"></label>
         <textarea id="new-page" name="content" rows="4" cols="50" autofocus placeholder="Enter markdown text here" required></textarea>
         <input type="text" required name="title" placeholder="Enter name of file">

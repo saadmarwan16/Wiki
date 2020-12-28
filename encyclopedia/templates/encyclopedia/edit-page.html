@@ -10,7 +10,6 @@
     <form action="{% url 'edit_page' filename %}" method="post">
         {% csrf_token %}
 
-        <!-- {{ form }} -->
         <label for="edit-page"></label>
         <textarea id="edit-page" name="content" rows="4" cols="50" autofocus placeholder="Enter markdown text here" required>{{ content | safe }}</textarea>
         <br><br>
